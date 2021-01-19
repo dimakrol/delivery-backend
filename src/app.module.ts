@@ -5,11 +5,11 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 
 @Module({
   imports: [
+    RestaurantsModule,
     GraphQLModule.forRoot({
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       autoSchemaFile: true,
     }),
-    RestaurantsModule,
   ],
   controllers: [],
   providers: [],
