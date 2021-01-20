@@ -13,7 +13,9 @@ export class RestaurantsService {
   getAll(): Promise<Restaurant[]> {
     return this.restaurant.find();
   }
-  createRestaurant(createRestaurantDto: CreateRestaurantDto): Promise<Restaurant> {
+  createRestaurant(
+    createRestaurantDto: CreateRestaurantDto,
+  ): Promise<Restaurant> {
     const newRestaurant = this.restaurant.create(createRestaurantDto);
     return this.restaurant.save(newRestaurant);
   }
