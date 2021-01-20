@@ -3,17 +3,25 @@ import { Restaurant } from './entities/restaurant.entity';
 import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
 import { RestaurantsService } from './restaurants.service';
 
-@Resolver((of) => Restaurant)
+@Resolver(() => Restaurant)
 export class RestaurantsResolver {
   constructor(private readonly restaurantsService: RestaurantsService) {}
   @Query(() => [Restaurant])
-  async restaurants(): Promise<Restaurant[]> {
-    return await this.restaurantsService.getAll();
+  restaurants(): Promise<Restaurant[]> {
+    return this.restaurantsService.getAll();
   }
 
-  @Mutation((returns) => Boolean)
-  createRestaurant(@Args() createRestaurantDto: CreateRestaurantDto): boolean {
-    return true;
+  @Mutation(() => Boolean)
+  async createRestaurant(
+    @Args() createRestaurantDto: CreateRestaurantDto,
+  ): Promise<boolean> {
+    try {
+      await this.restaurantsService.createRestaurant(createRestaurantDto);
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
   // @Mutation((returns) => Boolean)
   // createRestaurant(
