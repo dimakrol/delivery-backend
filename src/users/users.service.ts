@@ -20,7 +20,7 @@ export class UsersService {
       if (exists) {
         return { ok: false, error: 'There is a user with that email already.' };
       }
-      await this.users.save({ email, password, role });
+      await this.users.save(this.users.create({ email, password, role }));
       return { ok: true };
     } catch (e) {
       return { ok: false, error: "Couldn't create an account." };
