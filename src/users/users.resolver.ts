@@ -19,6 +19,7 @@ export class UsersResolver {
   createAccount(
     @Args('input') createAccountInput: CreateAccountInput,
   ): CreateAccountOutput {
+    console.log(createAccountInput);
     return {
       error: 'fasdfasf',
       ok: false,
