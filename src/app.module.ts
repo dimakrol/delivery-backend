@@ -32,7 +32,7 @@ import { User } from './users/entities/user.entity';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
-      logging: true,
+      logging: false,
       entities: [User],
     }),
     GraphQLModule.forRoot({
