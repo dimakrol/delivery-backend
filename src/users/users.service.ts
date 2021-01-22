@@ -4,11 +4,14 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
+import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
 
   async createAccount({
@@ -47,9 +50,13 @@ export class UsersService {
           error: 'Invalid user credentials!',
         };
       }
+      const token = jwt.sign(
+        { id: user.id },
+        this.configService.get('SECRET_KEY'),
+      );
       return {
         ok: true,
-        token: 'XXbcryptXX',
+        token,
       };
     } catch (error) {
       return {
