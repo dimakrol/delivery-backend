@@ -52,10 +52,7 @@ export class UsersService {
           error: 'Invalid user credentials!',
         };
       }
-      const token = jwt.sign(
-        { id: user.id },
-        this.configService.get('SECRET_KEY'),
-      );
+      const token = this.jwtService.sign({ id: user.id });
       return {
         ok: true,
         token,
