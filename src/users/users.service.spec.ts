@@ -6,6 +6,7 @@ import { Verification } from './entities/verification.entity';
 import { JwtService } from '../jwt/jwt.service';
 import { MailService } from '../mail/mail.service';
 import { Repository } from 'typeorm';
+import { UserRole } from './entities/user.entity';
 
 const mockRepository = {
   findOne: jest.fn(),
@@ -59,7 +60,21 @@ describe('UsersService', () => {
   });
 
   describe('createAccount', () => {
-    it('should fail if user exists', () => {});
+    it('should fail if user exists', async () => {
+      usersRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'aaaa@bbbb',
+      });
+      const result = await service.createAccount({
+        email: '',
+        password: '123123',
+        role: UserRole.Client,
+      });
+      expect(result).toMatchObject({
+        ok: false,
+        error: 'There is a user with that email already',
+      });
+    });
   });
 
   it.todo('login');
