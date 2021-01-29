@@ -10,7 +10,7 @@ export class MailService {
     @Inject(CONFIG_OPTIONS) private readonly options: MailModuleOptions,
   ) {}
 
-  private sendEmail(subject: string, template: string, emailVars: EmailVars[]) {
+  sendEmail(subject: string, template: string, emailVars: EmailVars[]) {
     const form = new FormData();
     form.append('from', `Joker from jokers <mailgun@${this.options.domain}>`);
     form.append('to', 'kroldmitriyvicktorovich@gmail.com');
