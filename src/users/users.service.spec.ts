@@ -7,8 +7,6 @@ import { JwtService } from '../jwt/jwt.service';
 import { MailService } from '../mail/mail.service';
 import { Repository } from 'typeorm';
 import { UserRole } from './entities/user.entity';
-import exp from 'constants';
-import mock = jest.mock;
 
 const mockRepository = () => ({
   findOne: jest.fn(),
