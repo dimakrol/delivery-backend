@@ -5,6 +5,7 @@ import { AppModule } from './../src/app.module';
 import { getConnection, Repository } from 'typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Verification } from '../src/users/entities/verification.entity';
 
 jest.mock('got', () => {
   return {
@@ -22,6 +23,7 @@ describe('UserModule (e2e)', () => {
   let app: INestApplication;
   let usersRepository: Repository<User>;
   let jwtToken: string;
+  let verificationsRepository: Repository<Verification>;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,6 +32,9 @@ describe('UserModule (e2e)', () => {
 
     app = module.createNestApplication();
     usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    verificationsRepository = module.get<Repository<Verification>>(
+      getRepositoryToken(Verification),
+    );
     await app.init();
   });
 
@@ -323,5 +328,62 @@ describe('UserModule (e2e)', () => {
     });
   });
 
-  it.todo('verifyEmail');
+  describe('verifyEmail', () => {
+    let verificationCode: string;
+    beforeAll(async () => {
+      const [verification] = await verificationsRepository.find();
+      verificationCode = verification.code;
+    });
+    it('should verify email', async () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            mutation {
+              verifyEmail(input: {code: "${verificationCode}"}) {
+                ok
+                error
+              }
+            }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                verifyEmail: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should fail on wrong verify code', async () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            mutation {
+              verifyEmail(input: {code: "WrongCodeXXX"}) {
+                ok
+                error
+              }
+            }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                verifyEmail: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(false);
+          expect(error).toEqual(expect.any(String));
+        });
+    });
+  });
 });
