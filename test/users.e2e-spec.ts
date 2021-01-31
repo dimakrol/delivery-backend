@@ -210,11 +210,7 @@ describe('UserModule (e2e)', () => {
           const {
             body: {
               data: {
-                userProfile: {
-                  ok,
-                  error,
-                  user,
-                },
+                userProfile: { ok, error, user },
               },
             },
           } = res;
@@ -225,7 +221,53 @@ describe('UserModule (e2e)', () => {
     });
   });
 
-  it.todo('me');
+  describe('me', () => {
+    it('should find my profile', async () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('x-jwt', jwtToken)
+        .send({
+          query: `
+            {
+              me {
+                email
+              }
+            }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res;
+          expect(email).toBe(testUser.email);
+        });
+    });
+
+    it('should not allow logged out user', async () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            {
+              me {
+                email
+              }
+            }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: { errors },
+          } = res;
+          const [error] = errors;
+          expect(error.message).toEqual('Forbidden resource');
+        });
+    });
+  });
   it.todo('verifyEmail');
   it.todo('editProfile');
 });
