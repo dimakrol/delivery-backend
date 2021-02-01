@@ -16,6 +16,7 @@ import { Verification } from './users/entities/verification.entity';
 import { MailModule } from './mail/mail.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
+import { RestaurantsModule } from './restaurants/restaurants.module';
 
 @Module({
   imports: [
@@ -44,10 +45,9 @@ import { Category } from './restaurants/entities/category.entity';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
-      logging:
-        process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
+      logging: false,
+      // process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
       entities: [User, Verification, Restaurant, Category],
-
     }),
     GraphQLModule.forRoot({
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -63,6 +63,7 @@ import { Category } from './restaurants/entities/category.entity';
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
     UsersModule,
+    RestaurantsModule,
   ],
   controllers: [],
   providers: [],
