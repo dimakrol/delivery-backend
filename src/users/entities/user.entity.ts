@@ -8,7 +8,7 @@ import {
 } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
-import { IsEmail, IsEnum } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 
 export enum UserRole {
   Client,
@@ -29,6 +29,7 @@ export class User extends CoreEntity {
 
   @Column({ select: false })
   @Field(() => String)
+  @IsString()
   password: string;
 
   @Field(() => UserRole)
@@ -41,6 +42,7 @@ export class User extends CoreEntity {
 
   @Field(() => Boolean)
   @Column({ default: false })
+  @IsBoolean()
   verified: boolean;
 
   @BeforeInsert()
