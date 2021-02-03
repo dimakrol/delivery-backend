@@ -21,6 +21,9 @@ export class AuthGuard implements CanActivate {
     if (!user) {
       return false;
     }
+    if (roles.includes('Any')) {
+      return true;
+    }
     return roles.includes(user.role);
   }
 }
