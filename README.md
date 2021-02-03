@@ -1,2 +1,2 @@
 # Delivery service
-The Backend of Deliver Service
+The Backend of Delivery Service
