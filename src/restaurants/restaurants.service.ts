@@ -8,6 +8,10 @@ import {
 } from './dtos/create-restaurant.dto';
 import { User } from '../users/entities/user.entity';
 import { Category } from './entities/category.entity';
+import {
+  EditRestaurantInput,
+  EditRestaurantOutput,
+} from './dtos/edit-restaurant.dto';
 
 @Injectable()
 export class RestaurantsService {
@@ -18,6 +22,7 @@ export class RestaurantsService {
     @InjectRepository(Category)
     private readonly categories: Repository<Category>,
   ) {}
+
   async createRestaurant(
     owner: User,
     createRestaurantInput: CreateRestaurantInput,
@@ -43,11 +48,24 @@ export class RestaurantsService {
       return {
         ok: true,
       };
-    } catch(e) {
-      console.log(e)
+    } catch (e) {
       return {
         ok: false,
         error: 'Could not create restaurant',
+      };
+    }
+  }
+
+  async editRestaurant(
+    owner: User,
+    editRestaurantInput: EditRestaurantInput,
+  ): Promise<EditRestaurantOutput> {
+    try {
+
+    } catch (e) {
+      return {
+        ok: false,
+        error: 'Could not edit restaurant',
       };
     }
   }
