@@ -9,7 +9,7 @@ import { CreateRestaurantInput } from './create-restaurant.dto';
 
 @InputType()
 export class EditRestaurantInput extends PartialType(CreateRestaurantInput) {
-  @Field(() => Number, { nullable: true })
+  @Field(() => Number)
   id: string;
 }
 

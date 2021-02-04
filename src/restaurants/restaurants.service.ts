@@ -23,6 +23,21 @@ export class RestaurantsService {
     private readonly categories: Repository<Category>,
   ) {}
 
+  async getOrCreateCategory(name: string): Promise<Category> {
+    const categoryName = name.trim().toLocaleLowerCase();
+    const categorySlug = categoryName.replace(/ /g, '-');
+    let category = await this.categories.findOne({ slug: categorySlug });
+    if (!category) {
+      category = await this.categories.save(
+        this.categories.create({
+          slug: categorySlug,
+          name: categoryName,
+        }),
+      );
+    }
+    return category;
+  }
+
   async createRestaurant(
     owner: User,
     createRestaurantInput: CreateRestaurantInput,
@@ -30,24 +45,15 @@ export class RestaurantsService {
     try {
       const newRestaurant = this.restaurants.create(createRestaurantInput);
       newRestaurant.owner = owner;
-      const categoryName = createRestaurantInput.categoryName
-        .trim()
-        .toLocaleLowerCase();
-      const categorySlug = categoryName.replace(/ /g, '-');
-      let category = await this.categories.findOne({ slug: categorySlug });
-      if (!category) {
-        category = await this.categories.save(
-          this.categories.create({
-            slug: categorySlug,
-            name: categoryName,
-          }),
-        );
-      }
-      newRestaurant.category = category;
+
+      newRestaurant.category = await this.getOrCreateCategory(
+        createRestaurantInput.categoryName,
+      );
       await this.restaurants.save(newRestaurant);
       return {
         ok: true,
       };
+
     } catch (e) {
       return {
         ok: false,
@@ -57,11 +63,27 @@ export class RestaurantsService {
   }
 
   async editRestaurant(
-    owner: User,
+    user: User,
     editRestaurantInput: EditRestaurantInput,
   ): Promise<EditRestaurantOutput> {
     try {
+      const restaurant = await this.restaurants.findOne(
+        editRestaurantInput.id,
+        { loadRelationIds: true },
+      );
 
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: 'Restaurant not found',
+        };
+      }
+      if (user.id !== restaurant.ownerId) {
+        return {
+          ok: false,
+          error: "You can't edit a restaurant you don't own",
+        };
+      }
     } catch (e) {
       return {
         ok: false,
