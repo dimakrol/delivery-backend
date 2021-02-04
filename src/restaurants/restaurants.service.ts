@@ -82,6 +82,10 @@ export class RestaurantsService {
           ...(category && { category }),
         },
       ]);
+
+      return {
+        ok: true,
+      };
     } catch (e) {
       return {
         ok: false,

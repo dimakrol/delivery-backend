@@ -32,7 +32,7 @@ export class RestaurantsResolver {
   async editRestaurant(
     @AuthUser() authUser: User,
     @Args('input') editRestaurantInput: EditRestaurantInput,
-  ): Promise<CreateRestaurantOutput> {
+  ): Promise<EditRestaurantOutput> {
     return this.restaurantsService.editRestaurant(
       authUser,
       editRestaurantInput,
