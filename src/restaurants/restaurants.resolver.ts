@@ -10,6 +10,7 @@ import { User, UserRole } from '../users/entities/user.entity';
 import { SetMetadata } from '@nestjs/common';
 import { Role } from '../auth/role.decorator';
 import { EditRestaurantInput, EditRestaurantOutput } from './dtos/edit-restaurant.dto';
+import { DeleteRestaurantInput, DeleteRestaurantOutput } from './dtos/delete-restaurant.dto';
 
 @Resolver(() => Restaurant)
 export class RestaurantsResolver {
@@ -36,6 +37,18 @@ export class RestaurantsResolver {
     return this.restaurantsService.editRestaurant(
       authUser,
       editRestaurantInput,
+    );
+  }
+
+  @Mutation(() => DeleteRestaurantOutput)
+  @Role([UserRole.Owner])
+  async deleteRestaurant(
+    @AuthUser() authUser: User,
+    @Args('input') deleteRestaurantInput: DeleteRestaurantInput,
+  ): Promise<DeleteRestaurantOutput> {
+    return this.restaurantsService.deleteRestaurant(
+      authUser,
+      deleteRestaurantInput,
     );
   }
 }
