@@ -15,6 +15,7 @@ import {
 import { CategoryRepository } from './repositories/category.repository';
 import { DeleteRestaurantInput, DeleteRestaurantOutput } from './dtos/delete-restaurant.dto';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 
 @Injectable()
 export class RestaurantsService {
@@ -146,5 +147,29 @@ export class RestaurantsService {
 
   async countRestaurants(category: Category): Promise<number> {
     return this.restaurants.count({ category });
+  }
+
+  async findCategoryBySlug({ slug }: CategoryInput): Promise<CategoryOutput> {
+    try {
+      const category = await this.categories.findOne(
+        { slug },
+        { relations: ['restaurants'] },
+      );
+      if (!category) {
+        return {
+          ok: false,
+          error: 'Category not found',
+        };
+      }
+      return {
+        ok: true,
+        category,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: 'Could not load category',
+      };
+    }
   }
 }
