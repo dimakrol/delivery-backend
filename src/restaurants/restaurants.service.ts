@@ -27,6 +27,8 @@ import {
 } from './dtos/search-restaurant.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 import { Dish } from './entities/dish.entity';
+import { EditDishInput, EditDishOutput } from './dtos/edit-dish.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/delete-dish.dto';
 
 @Injectable()
 export class RestaurantsService {
@@ -288,13 +290,13 @@ export class RestaurantsService {
           error: 'Not authorized action!',
         };
       }
-      const dish = await this.dishes.save(
+      await this.dishes.save(
         this.dishes.create({
           ...createDishInput,
           restaurant,
         }),
       );
-      console.log(dish);
+
       return {
         ok: true,
       };
@@ -303,6 +305,78 @@ export class RestaurantsService {
       return {
         ok: false,
         error: 'Dish did not created!',
+      };
+    }
+  }
+
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishes.findOneOrFail(editDishInput.dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return {
+          ok: false,
+          error: 'Dish not found!',
+        };
+      }
+
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: 'Unauthorized action!',
+        };
+      }
+
+      await this.dishes.save({
+        id: editDishInput.dishId,
+        ...editDishInput,
+      });
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        ok: false,
+        error: 'Dish did not deleted!',
+      };
+    }
+  }
+
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<DeleteDishOutput> {
+    try {
+      const dish = await this.dishes.findOneOrFail(dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return {
+          ok: false,
+          error: 'Dish not found!',
+        };
+      }
+      console.log(dish)
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: 'Unauthorized action!',
+        };
+      }
+      await this.dishes.delete(dishId);
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        ok: false,
+        error: 'Dish did not deleted!',
       };
     }
   }
