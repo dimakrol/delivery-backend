@@ -10,6 +10,8 @@ import { CoreEntity } from '../../common/entities/core.entity';
 import { User, UserRole } from '../../users/entities/user.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
 import { Dish } from '../../restaurants/entities/dish.entity';
+import { OrderItem } from './order-item.entity';
+import { IsEnum, IsNumber } from 'class-validator';
 
 export enum OrderStatus {
   Pending = 'Pending',
@@ -45,13 +47,14 @@ export class Order extends CoreEntity {
   })
   restaurant: Restaurant;
 
-  @Field(() => [Dish])
-  @ManyToMany(() => Dish)
+  @Field(() => [OrderItem])
+  @ManyToMany(() => OrderItem)
   @JoinTable()
-  dishes: Dish[];
+  items: OrderItem[];
 
   @Column({ nullable: true })
   @Field(() => Float, { nullable: true })
+  @IsNumber()
   total?: number;
 
   @Column({
@@ -59,5 +62,6 @@ export class Order extends CoreEntity {
     enum: OrderStatus,
   })
   @Field(() => OrderStatus)
+  @IsEnum(OrderStatus)
   status: OrderStatus;
 }
