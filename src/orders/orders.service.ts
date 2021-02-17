@@ -22,6 +22,23 @@ export class OrdersService {
       const restaurant = await this.restaurants.findOneOrFail(
         createOrderInput.restaurantId,
       );
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: 'Cannot find restaurant.',
+        };
+      }
+
+      const order = await this.orders.save(
+        this.orders.create({
+          customer,
+          restaurant,
+        }),
+      );
+      console.log(order);
+      return {
+        ok: true,
+      };
     } catch (e) {
       console.log(e);
       return {
