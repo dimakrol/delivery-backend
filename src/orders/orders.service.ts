@@ -5,22 +5,28 @@ import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
 import { User } from '../users/entities/user.entity';
 import { Restaurant } from '../restaurants/entities/restaurant.entity';
+import { OrderItem } from './entities/order-item.entity';
+import { Dish } from '../restaurants/entities/dish.entity';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order) private readonly orders: Repository<Order>,
+    @InjectRepository(OrderItem)
+    private readonly orderItems: Repository<OrderItem>,
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
+    @InjectRepository(Dish)
+    private readonly dishes: Repository<Dish>,
   ) {}
 
   async createOrder(
     customer: User,
-    createOrderInput: CreateOrderInput,
+    { restaurantId, items }: CreateOrderInput,
   ): Promise<CreateOrderOutput> {
     try {
       const restaurant = await this.restaurants.findOneOrFail(
-        createOrderInput.restaurantId,
+        restaurantId,
       );
       if (!restaurant) {
         return {
@@ -29,13 +35,24 @@ export class OrdersService {
         };
       }
 
-      const order = await this.orders.save(
-        this.orders.create({
-          customer,
-          restaurant,
-        }),
-      );
-      console.log(order);
+      // const order = await this.orders.save(
+      //   this.orders.create({
+      //     customer,
+      //     restaurant,
+      //   }),
+      // );
+      for (const item of items) {
+        const dish = await this.dishes.findOne(item.dishId);
+        if (!dish) {
+          //about
+        }
+        await this.orderItems.save(
+          this.orderItems.create({
+            dish,
+            options: item.options,
+          }),
+        );
+      }
       return {
         ok: true,
       };
