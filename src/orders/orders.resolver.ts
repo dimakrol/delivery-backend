@@ -9,6 +9,7 @@ import {
   GetOrdersInput,
   GetOrdersOutput,
 } from './dtos/get-orders.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -30,5 +31,14 @@ export class OrdersResolver {
     @Args('input') getOrdersInput: GetOrdersInput,
   ) {
     return this.ordersService.getOrders(user, getOrdersInput);
+  }
+
+  @Query(() => GetOrderOutput)
+  @Role(['Any'])
+  async getOrder(
+    @AuthUser() user: User,
+    @Args('input') getOrderInput: GetOrderInput,
+  ) {
+    return this.ordersService.getOrder(user, getOrderInput);
   }
 }

@@ -8,6 +8,7 @@ import { Restaurant } from '../restaurants/entities/restaurant.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { Dish } from '../restaurants/entities/dish.entity';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -105,22 +106,28 @@ export class OrdersService {
         orders = await this.orders.find({
           where: {
             customer: user,
+            ...(status && { status }),
           },
         });
       } else if (user.role === UserRole.Delivery) {
         orders = await this.orders.find({
           where: {
             driver: user,
+            ...(status && { status }),
           },
         });
       } else if (user.role === UserRole.Owner) {
         const restaurants = await this.restaurants.find({
           where: {
             owner: user,
+            ...(status && { status }),
           },
           relations: ['orders'],
         });
         orders = restaurants.map((restaurant) => restaurant.orders).flat();
+        if (status) {
+          orders = orders.filter((order) => order.status === status);
+        }
       }
 
       return {
@@ -131,6 +138,54 @@ export class OrdersService {
       return {
         ok: false,
         error: 'Could not load orders',
+      };
+    }
+  }
+
+  async getOrder(
+    user: User,
+    { id: orderId }: GetOrderInput,
+  ): Promise<GetOrderOutput> {
+    try {
+      const order = await this.orders.findOne(orderId, {
+        relations: ['restaurant'],
+      });
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Can not find an order',
+        };
+      }
+      let canSee = true;
+      if (user.role === UserRole.Client && order.customerId !== user.id) {
+        canSee = false;
+      }
+
+      if (user.role === UserRole.Delivery && order.driverId !== user.id) {
+        canSee = false;
+      }
+
+      if (
+        user.role === UserRole.Owner &&
+        order.restaurant.ownerId !== user.id
+      ) {
+        canSee = false;
+      }
+      if (!canSee) {
+        return {
+          ok: false,
+          error: 'not allowed!!!',
+        };
+      }
+
+      return {
+        ok: true,
+        order,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'Could not find an order',
       };
     }
   }
