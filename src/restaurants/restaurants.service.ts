@@ -361,7 +361,7 @@ export class RestaurantsService {
           error: 'Dish not found!',
         };
       }
-      console.log(dish)
+
       if (dish.restaurant.ownerId !== owner.id) {
         return {
           ok: false,
