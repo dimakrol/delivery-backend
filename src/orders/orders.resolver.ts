@@ -9,12 +9,15 @@ import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { PubSub } from 'graphql-subscriptions';
-
-const pubsub = new PubSub();
+import { Inject } from '@nestjs/common';
+import { PUB_SUB } from '../common/common.constants';
 
 @Resolver(() => Order)
 export class OrdersResolver {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
+  ) {}
 
   @Mutation(() => CreateOrderOutput)
   @Role([UserRole.Client])
@@ -54,7 +57,7 @@ export class OrdersResolver {
 
   @Mutation(() => Boolean)
   orderReady() {
-    pubsub.publish('fireOrder', {
+    this.pubSub.publish('fireOrder', {
       fireOrderSubscription: 'your order is ready',
     });
     return true;
@@ -64,6 +67,6 @@ export class OrdersResolver {
   @Role(['Any'])
   fireOrderSubscription(@AuthUser() user: User) {
     console.log(user);
-    return pubsub.asyncIterator('fireOrder');
+    return this.pubSub.asyncIterator('fireOrder');
   }
 }
