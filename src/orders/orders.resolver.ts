@@ -61,7 +61,9 @@ export class OrdersResolver {
   }
 
   @Subscription(() => String)
-  fireOrderSubscription() {
+  @Role(['Any'])
+  fireOrderSubscription(@AuthUser() user: User) {
+    console.log(user);
     return pubsub.asyncIterator('fireOrder');
   }
 }
