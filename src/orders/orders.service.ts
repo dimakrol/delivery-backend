@@ -10,8 +10,14 @@ import { Dish } from '../restaurants/entities/dish.entity';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
-import {NEW_COOKED_ORDER, NEW_ORDER_UPDATE, NEW_PENDING_ORDER, PUB_SUB} from '../common/common.constants';
+import {
+  NEW_COOKED_ORDER,
+  NEW_ORDER_UPDATE,
+  NEW_PENDING_ORDER,
+  PUB_SUB,
+} from '../common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -266,6 +272,42 @@ export class OrdersService {
       return {
         ok: false,
         error: 'Could not edit order',
+      };
+    }
+  }
+
+  async takeOrder(
+    driver: User,
+    { id: orderId }: TakeOrderInput,
+  ): Promise<TakeOrderOutput> {
+    try {
+      const order = await this.orders.findOne(orderId);
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Order not found!',
+        };
+      }
+      if (order.driver) {
+        return {
+          ok: false,
+          error: 'This order already has a driver',
+        };
+      }
+      await this.orders.save({
+        id: orderId,
+        driver,
+      });
+      await this.pubSub.publish(NEW_ORDER_UPDATE, {
+        orderUpdates: { ...order, driver },
+      });
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'Could not update order',
       };
     }
   }
