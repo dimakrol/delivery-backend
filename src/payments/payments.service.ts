@@ -9,7 +9,6 @@ import {
 import { User } from '../users/entities/user.entity';
 import { Restaurant } from '../restaurants/entities/restaurant.entity';
 import { GetPaymentsOutput } from './dtos/get-payments.dto';
-import {Cron, Interval} from '@nestjs/schedule';
 
 @Injectable()
 export class PaymentsService {
@@ -37,6 +36,11 @@ export class PaymentsService {
           error: 'You are not allowed to do this.',
         };
       }
+      restaurant.isPromoted = true;
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      restaurant.promotedUntil = date;
+      await this.restaurants.save(restaurant);
       await this.payments.save(
         this.payments.create({
           transactionId,
@@ -69,14 +73,4 @@ export class PaymentsService {
       };
     }
   }
-
-  // @Cron('* */1 * * *')
-  // async checkForPayments() {
-  //   console.log('XXX');
-  // }
-  //
-  // @Interval(20000)
-  // async checkForPaymentsInterval() {
-  //   console.log('XXX interval 20 secs');
-  // }
 }
